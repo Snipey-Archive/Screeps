@@ -14,7 +14,7 @@ module.exports = function(p_room) {
   var explorers = 0;
   var hoarders = 0;
 
-  var MAX_WORKERS = 8;
+  var MAX_WORKERS = 6;
   var MAX_GUARDS = 4;
   var MAX_BUILDERS = 2;
   var MAX_WARRIORS = 0;
@@ -24,7 +24,7 @@ module.exports = function(p_room) {
 
   var explorerDestination = 'W11S23';
 
-/*  if(typeof Game.rooms['W11S23'].memory.worker_counter === 'undefined') {
+  if(typeof Game.rooms['W11S23'].memory.worker_counter === 'undefined') {
     Game.rooms['W11S23'].memory.worker_counter = 0;
     Game.rooms['W11S23'].memory.builder_counter = 0;
     Game.rooms['W11S23'].memory.guard_counter = 0;
@@ -32,7 +32,8 @@ module.exports = function(p_room) {
     Game.rooms['W11S23'].memory.healer_counter = 0;
     Game.rooms['W11S23'].memory.explorer_counter = 0;
     Game.rooms['W11S23'].memory.horder_counter = 0;
-  }*/
+
+  }
 
   // count creeps
   for(var name in Game.creeps) {
@@ -80,17 +81,17 @@ module.exports = function(p_room) {
               explorers + ' explorers, and ' +
               hoarders + ' hoarders.');
 
-  /*// spawn guards
+  // spawn guards
   if(guards < MAX_GUARDS && workers > MAX_WORKERS / 2 ) {
     if(Game.rooms['W11S23'].energyAvailable >= 270){
       var results = 0;
         // spawn standard guard
 
         console.log('Spawning a new tough guard.');
-        results = Game.spawns.Spawn1.createCreep([TOUGH,ATTACK,ATTACK,ATTACK,ATTACK,MOVE,MOVE], 'G' + Game.rooms['W11S23'].memory.guard_counter, { role: 'guard'});
+        results = Game.spawns.Spawn1.createCreep([TOUGH, ATTACK, ATTACK, ATTACK, ATTACK, MOVE, MOVE], 'G' + Game.rooms['W11S23'].memory.guard_counter, { role: 'guard'});
       if(results == ERR_NOT_ENOUGH_ENERGY){
         console.log('Spawning a new guard, tough guard said ' + displayErr(results) + '.');
-        results = Game.spawns.Spawn1.createCreep([TOUGH,ATTACK,ATTACK,MOVE,MOVE], 'g' + Game.rooms['W11S23'].memory.guard_counter, { role: 'guard'});
+        results = Game.spawns.Spawn1.createCreep([TOUGH, ATTACK, ATTACK, MOVE, MOVE], 'g' + Game.rooms['W11S23'].memory.guard_counter, { role: 'guard'});
       }
 
       if(results == OK || results == ERR_NAME_EXISTS) {
@@ -99,7 +100,7 @@ module.exports = function(p_room) {
     } else {
       console.log('I wanted to spawn a guard - energy levels at ' + Game.rooms['W11S23'].energyAvailable + ' of required 270.');
     }
-  }*/
+  }
 
 
   // spawn workers
@@ -107,10 +108,10 @@ module.exports = function(p_room) {
     if(Game.rooms['W11S23'].energyAvailable >= 250) {
       var results = 0;
       console.log('Spawning a new mega worker.');
-      results = ( [MOVE,MOVE,CARRY,CARRY,CARRY,CARRY,WORK,WORK], 'W' + Game.rooms['W11S23'].memory.worker_counter, { role: 'harvester', locked: false});
+      results = Game.spawns.Spawn1.createCreep( [MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, WORK, WORK], 'W' + Game.rooms['W11S23'].memory.worker_counter, { role: 'harvester', locked: false});
       if(results == ERR_NOT_ENOUGH_ENERGY){
         console.log('Spawning a new worker - mega worker said: ' + displayErr(results) +'.');
-        results = Game.spawns.Spawn1.createCreep( [MOVE, CARRY, CARRY,WORK], 'w' + Game.rooms['W11S23'].memory.worker_counter, { role: 'harvester', locked: false});
+        results = Game.spawns.Spawn1.createCreep( [MOVE, CARRY, CARRY, WORK], 'w' + Game.rooms['W11S23'].memory.worker_counter, { role: 'harvester', locked: false});
       }
       if(results == OK || results == ERR_NAME_EXISTS) {
         Game.rooms['W11S23'].memory.worker_counter +=1;
@@ -123,7 +124,7 @@ module.exports = function(p_room) {
   // spawn hoarders
   if( hoarders < MAX_HOARDERS && workers >= MAX_WORKERS) {
     if(Game.rooms['W11S23'].energyAvailable >= 250) {
-      var results = Game.spawns.Spawn1.createCreep( [MOVE, MOVE,CARRY, CARRY, CARRY,CARRY, CARRY,WORK, WORK,WORK,WORK], 'H' + Game.rooms['W11S23'].memory.hoarder_counter, { role: 'hoarder', locked: true});
+      var results = Game.spawns.Spawn1.createCreep( [MOVE, MOVE,CARRY, CARRY, CARRY, CARRY, CARRY, WORK, WORK, WORK, WORK], 'H' + Game.rooms['W11S23'].memory.hoarder_counter, { role: 'hoarder', locked: true});
       console.log('Spawning a new hoarder - ' + displayErr(results) +'.');
       if(results == OK || results == ERR_NAME_EXISTS) {
         Game.rooms['W11S23'].memory.hoarder_counter +=1;
@@ -139,10 +140,10 @@ module.exports = function(p_room) {
     if(Game.rooms['W11S23'].energyAvailable >= 300){
       var results = OK;
       console.log('Spawning a new mega builder.');
-      results = Game.spawns.Spawn1.createCreep([WORK,WORK,CARRY,CARRY,MOVE,MOVE], 'B' + Game.rooms['W11S23'].memory.builder_counter, { role: 'builder', state: 'constructing'});
+      results = Game.spawns.Spawn1.createCreep([WORK, WORK, CARRY, CARRY, MOVE, MOVE], 'B' + Game.rooms['W11S23'].memory.builder_counter, { role: 'builder', state: 'constructing'});
       if(results == ERR_NOT_ENOUGH_ENERGY) {
         console.log('Spawning a new builder, mega builder said: ' + displayErr(results));
-        results = Game.spawns.Spawn1.createCreep([WORK,CARRY,CARRY,MOVE], 'b' + Game.rooms['W11S23'].memory.builder_counter, {role: 'builder', state: 'constructing'});
+        results = Game.spawns.Spawn1.createCreep([WORK, CARRY, CARRY, MOVE], 'b' + Game.rooms['W11S23'].memory.builder_counter, {role: 'builder', state: 'constructing'});
       }
       if(results == OK || results == ERR_NAME_EXISTS) {
         Game.rooms['W11S23'].memory.builder_counter += 1;
@@ -159,7 +160,7 @@ module.exports = function(p_room) {
       var explorerName = 'E' + Game.rooms['W11S23'].memory.explorer_counter;
       console.log('Spawning a new explorer - ' + explorerName + '.');
 
-      var results = Game.spawns.Spawn1.createCreep([ATTACK,ATTACK,MOVE,MOVE,MOVE,ATTACK], explorerName, { role: 'explorer', mode: 'room', roomDestination: explorerDestination});
+      var results = Game.spawns.Spawn1.createCreep([ATTACK, ATTACK, MOVE, MOVE, MOVE, ATTACK], explorerName, { role: 'explorer', mode: 'room', roomDestination: explorerDestination});
       if(results == OK || results == ERR_NAME_EXISTS) {
         Game.rooms['W11S23'].memory.explorer_counter += 1;
       } else {
