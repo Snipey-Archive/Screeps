@@ -1,93 +1,68 @@
-//Creeps
-var spawn = require('spawn');
-var harvester = require('harvester');
-var transport = require('transport');
-//Lib
-var lca = require('logCreepActions');
-var numberWithCommas = require('numbersWithCommas');
-var util = require('util');
-//Logic
-var processHarvester = require('processHarvester');
-var processTransport = require('processTransport');
-var processUpgrade = require('processUpgrade');
-var p_rooms = ["W11S29"];
+/**
+ * The main module for the Screeps project.
+ *
+ * This module runs once every CPU "tick".
+ *
+ */
 
-module.exports.loop = function () {
+var CreepSpawning = require('creep_spawner')
+var CreepRole = require('creep_role')()
+//var creepCount = require('creepCounter')
+// Notes to self:
+// -Game.rooms accesses only rooms you have presence in.
+// -For arrays, shift removes and returns the first item,
+//    pop removes and returns the last item,
+//    array[array.length - 1] gets the last item,
+//    and array[0] gets the first item,
+if(Memory.spawnQueue == undefined) {
+    //Create the array of creeps that need to be spawned.
+    Memory.spawnQueue = []
+}
 
-    console.log('===== Tick =====');
+/*if(Memory.spawnInfinite == undefined) {
+    //The creep that the spawn creates infinitely after the queue is done.
+    Memory.spawnInfinite = 'archer'
+}*/
 
-    spawn(p_rooms);
+// MAIN UPDATE LOOP
+// Stuff outside this loop only executes when a new global is created.
+module.exports.loop = function() {
+    //creepCount.getRoomNeed();
+    //Have each of our creeps do its job.
+    for(var i in Game.creeps) {
+        var CreepCurrent = Game.creeps[i]
 
-    var harvester = [];
-    var transport = [];
-    var upgrader = [];
+        if(CreepCurrent.spawning || CreepCurrent.memory.role == undefined || CreepCurrent.memory.role == null)
+            continue;
 
-    for(var name in Game.creeps) {
-        var creep = Game.creeps[name];
-
-        if(creep.age < 25) {
-            lca(creep, 'is about to die in ' + creep.age + ' ticks.');
-        }
-
-        switch(creep.memory.role) {
-            case 'harvester':
-                harvester.push(creep.id);
-                break;
-            case 'transport':
-                transport.push(creep.id);
-                break;
-            case 'upgrader':
-                upgrader.push(creep.id);
-                break;
-            default:
-                lca(creep, 'does not have a programmed role.');
-                break;
-        }
+        CreepCurrent.performRole(CreepRole)
     }
 
-    processHarvester(harvester, p_rooms);
-    processTransport(transport, p_rooms);
-    processUpgrade(transport, p_rooms);
-    //processBuilders(builders, p_room);
-    //processHoarders(hoarders, p_room);
-    //processExplorers(explorers);
+    //Have each of our spawns create creeps.
+    for(var i in Game.spawns) {
+        var SpawnCurrent = Game.spawns[i]
 
-    console.log('Global Control Report - Level: ' + Game.gcl.level + ' - ' + numberWithCommas(Game.gcl.progress) + ' of ' + numberWithCommas(Game.gcl.progressTotal) + '.');
-    //for(var p_room in p_rooms){
-        //console.log('Room' + p_rooms + ' Energy: ' + numberWithCommas(p_rooms.energyAvailable) + ' of ' + numberWithCommas(p_rooms.energyCapacityAvailable));
-        //console.log(' Energy: ' + numberWithCommas(p_rooms.energyAvailable) + ' of ' + numberWithCommas(p_rooms.energyCapacityAvailable));
-        //console.log('all scripts completed ' + Game.time);
-        //console.log('totalEnergy: ' + numberWithCommas(totalEnergy(p_room)));
-    //}
-/*    for (var creep in Memory.creeps) {
-        if (!Game.creeps[creep]) {
-            if (Memory.creeps[creep].safeToDelete) {
-                delete Memory.creeps[creep];
-            }
-            else {
-                Memory.creeps[creep].safeToDelete = true;
+        if(SpawnCurrent.spawning == null) {
+            console.log("    - Spawn has "+SpawnCurrent.energy+"/"+CreepRole.getRoleCost(Memory.spawnQueue[0])+" needed energy")
+            if(SpawnCurrent.energy >= CreepRole.getRoleCost(Memory.spawnQueue[0])) {
+                if(Number.isInteger(SpawnCurrent.createRole(CreepRole, Memory.spawnQueue[0]))) {
+                    console.log("Creating creep: Failed")
+                } else {
+                    console.log("Creating creep: Succeeded")
+                    Memory.spawnQueue.shift();
+                }
             }
         }
     }
-    for (var room in Memory.rooms) {
-        if (!Game.rooms[room]) {
-            if (Memory.rooms[room].safeToDelete) {
-                delete Memory.rooms[room];
-            }
-            else {
-                Memory.rooms[room].safeToDelete = true;
-            }
-        }
-    }
-    for (var flag in Memory.flags) {
-        if (!Game.flags[flag]) {
-            if (Memory.flags[flag].safeToDelete) {
-                delete Memory.flags[flag];
-            }
-            else {
-                Memory.flags[flag].safeToDelete = true;
-            }
-        }
-    }*/
+    //Print status to the console.
 
-};
+    console.log("-------------------------------")
+    console.log("|  Snipey's screeps v0.1  |")
+    console.log("-------------------------------")
+    console.log(" - Current Rooms: "+Object.keys(Game.rooms).length)
+    console.log(" - Current Creeps: "+Object.keys(Game.creeps).length)
+    console.log("   - Next Creep: "+Memory.spawnQueue[0]+" ("+CreepRole.getRoleCost(Memory.spawnQueue[0])+")")
+    console.log(" - Current Spawns: "+Object.keys(Game.spawns).length)
+    console.log(" - Current Queue: "+Object.keys(Memory.spawnQueue).length)
+
+}
