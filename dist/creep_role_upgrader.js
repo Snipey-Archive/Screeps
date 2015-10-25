@@ -1,26 +1,22 @@
+
 /**
- * A simple miner.
- *
- * Moves to a source and collects the energy,
- * then returns to base when full.
- *
- * Really you should only make one of this, wait until it's phased out by miners and haulers.
+ * Created by Snipey on 10/17/2015.
  */
 module.exports = function() {
     var upgrader = {
-            parts: [
-                [WORK, CARRY, MOVE, CARRY, MOVE],
-                [MOVE, MOVE, MOVE, CARRY, CARRY, MOVE, WORK, CARRY, WORK],
-                [MOVE, MOVE, MOVE, MOVE, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY],
-                [MOVE, MOVE, MOVE, MOVE, MOVE, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY]
-            ],
+        parts: [
+            [WORK, CARRY, MOVE, CARRY, MOVE],
+            [MOVE, MOVE, MOVE, CARRY, CARRY, MOVE, WORK, CARRY, WORK],
+            [MOVE, MOVE, MOVE, MOVE, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY],
+            [MOVE, MOVE, MOVE, MOVE, MOVE, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY]
+        ],
 
-            costs: [
-                300,
-                550,
-                700,
-                1000
-            ]
+        costs: [
+            300,
+            550,
+            700,
+            1000
+        ]
     };
 
     upgrader.getPartsForExtensionCount = function(count) {
@@ -28,53 +24,70 @@ module.exports = function() {
         return this.parts[count]
     },
 
-    upgrader.getParts = function() {
-        return this.getPartsForExtensionCount(0)
-    },
-
-    upgrader.getCostForExtensionCount = function(count) {
-        return this.costs[count]
-    },
-
-    upgrader.getCost = function() {
-        return this.getCostForExtensionCount(0)
-    },
-
-    upgrader.performRole = function(CreepRole, creep) {
-        if (creep.ticksToLive < 20) {
-            var storage = creep.room.storage;
-            creep.moveTo(storage);
-            if (creep.energy > 0) {
-                creep.transferEnergy(storage);
+        upgrader.getParts = function() {
+            var room = Game.rooms['E29N19']
+            if (room.energyAvailable >= 300 && room.energyAvailable < 550) {
+                console.log("LEVEL 1")
+                return this.getPartsForExtensionCount(0)
+            } else if (room.energyAvailable >= 550 && room.energyAvailable < 700) {
+                console.log("LEVEL 2")
+                return this.getPartsForExtensionCount(1)
+            } else if (room.energyAvailable >= 700 && room.energyAvailable < 1000) {
+                return this.getPartsForExtensionCount(2)
+            } else if (room.energyAvailable >= 1000) {
+                return this.getPartsForExtensionCount(3)
+            }else{
+                return this.getPartsForExtensionCount(1)
             }
-            else if (creep.energy === 0) {
-                creep.suicide();
-            }
-        }
+        },
 
-        if (creep.carry.energy === 0) {
-            creep.memory.state = "pickup";
-        }
-        if (creep.carry.energy === creep.carryCapacity || creep.memory.state === undefined) {
-            creep.memory.state = "work";
-        }
-        if (creep.memory.state === 'pickup') {
-            var storages = creep.room.find(FIND_MY_STRUCTURES, {
-                filter: function (s) {
-                    return s.structureType == STRUCTURE_STORAGE && s.store.energy > 0;
+        upgrader.getCostForExtensionCount = function(count) {
+            return this.costs[count]
+        },
+
+        upgrader.getCost = function() {
+            var room = Game.rooms['E29N19']
+            if (room.energyAvailable >= 300 && room.energyAvailable < 550) {
+                console.log("LEVEL 1")
+                return this.getCostForExtensionCount(0)
+            } else if (room.energyAvailable >= 550 && room.energyAvailable < 700) {
+                console.log("LEVEL 2")
+                return this.getCostForExtensionCount(1)
+            } else if (room.energyAvailable >= 700 && room.energyAvailable < 1000) {
+                return this.getCostForExtensionCount(2)
+            } else if (room.energyAvailable >= 1000) {
+                return this.getCostForExtensionCount(3)
+            }else{
+                return this.getCostForExtensionCount(2)
+            }
+        },
+
+        upgrader.performRole = function(CreepRole, creep) {
+
+            if (creep.carry.energy == 0){
+                creep.memory.state = "pickup"
+            }
+            if (creep.memory.state == "pickup"){
+                var Target = creep.pos.findClosestByRange(FIND_MY_SPAWNS)
+                if (Target != null) {
+                    creep.moveTo(Target, {
+                        reusePath: 15
+                    })
+                    Target.transferEnergy(creep)
                 }
-            });
-
-            if (storages.length > 0) {
-                creep.moveTo(storages[0]);
-                storages[0].transferEnergy(creep);
+            }
+            if (creep.carry.energy >= creep.carryCapacity){
+                creep.memory.state = "work"
+            }
+            if (creep.memory.state == "work"){
+                var Target = creep.room.controller
+                if(Target != null){
+                    creep.moveTo(Target, {
+                        reusePath: 15
+                    })
+                    creep.upgradeController(Target)
+                }
             }
         }
-        else if (creep.memory.state === 'work') {
-            var spawn = Game.spawns.Spawn1;
-            creep.moveTo(spawn.room.controller);
-            creep.upgradeController(spawn.room.controller);
-        }
-    }
     return upgrader;
 }

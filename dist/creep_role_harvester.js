@@ -6,86 +6,92 @@
  *
  * Really you should only make one of this, wait until it's phased out by miners and haulers.
  */
-module.exports = function() {
+module.exports = function () {
     var harvester = {
-            parts: [
-                [WORK, WORK, MOVE, MOVE],
-                [MOVE, MOVE, MOVE, WORK, WORK, WORK, WORK],
-                [WORK, WORK, WORK, WORK, MOVE, MOVE, MOVE, MOVE, WORK],
-                [WORK, WORK, WORK, WORK, WORK, MOVE, MOVE, MOVE, MOVE, MOVE, WORK, CARRY, CARRY, MOVE]
-            ],
+        parts: [
+            [WORK, WORK, MOVE, MOVE],
+            [MOVE, MOVE, MOVE, WORK, WORK, WORK, WORK],
+            [WORK, WORK, WORK, WORK, MOVE, MOVE, MOVE, MOVE, WORK],
+            [WORK, WORK, WORK, WORK, WORK, MOVE, MOVE, MOVE, MOVE, MOVE, WORK, CARRY, CARRY, MOVE]
+        ],
 
-            costs: [
-                300,
-                550,
-                700,
-                1000
-            ]
+        costs: [
+            300,
+            550,
+            700,
+            1000
+        ]
     };
 
-    harvester.getPartsForExtensionCount = function(count) {
-        console.log("Parts By Extension: "+this.parts[count])
+    harvester.getPartsForExtensionCount = function (count) {
+        console.log("Parts By Extension: " + this.parts[count])
         return this.parts[count]
     },
 
-    harvester.getParts = function() {
-        return this.getPartsForExtensionCount(0)
-    },
+        harvester.getParts = function () {
+            var room = Game.rooms['E29N19']
+            if (room.energyAvailable >= 300 && room.energyAvailable < 550) {
+                console.log("LEVEL 1")
+                return this.getPartsForExtensionCount(0)
+            } else if (room.energyAvailable >= 550 && room.energyAvailable < 700) {
+                console.log("LEVEL 2")
+                return this.getPartsForExtensionCount(1)
+            } else if (room.energyAvailable >= 700 && room.energyAvailable < 1000) {
+                return this.getPartsForExtensionCount(2)
+            } else if (room.energyAvailable >= 1000) {
+                return this.getPartsForExtensionCount(3)
+            }else{
+                return this.getPartsForExtensionCount(1)
+            }
+        },
 
-    harvester.getCostForExtensionCount = function(count) {
-        return this.costs[count]
-    },
+        harvester.getCostForExtensionCount = function (count) {
+            return this.costs[count]
+        },
 
-    harvester.getCost = function() {
-        return this.getCostForExtensionCount(0)
-    },
+        harvester.getCost = function () {
+            var room = Game.rooms['E29N19']
+            if (room.energyAvailable >= 300 && room.energyAvailable < 550) {
+                console.log("LEVEL 1")
+                return this.getCostForExtensionCount(0)
+            } else if (room.energyAvailable >= 550 && room.energyAvailable < 700) {
+                console.log("LEVEL 2")
+                return this.getCostForExtensionCount(1)
+            } else if (room.energyAvailable >= 700 && room.energyAvailable < 1000) {
+                return this.getCostForExtensionCount(2)
+            } else if (room.energyAvailable >= 1000) {
+                return this.getCostForExtensionCount(3)
+            }else{
+                return this.getCostForExtensionCount(1)
+            }
+//Game.getObjectById('55db34f1efa8e3fe66e061be').needsHarvesters()
+        },
 
-    harvester.performRole = function(CreepRole, creep) {
-        if(creep.memory.harvesting == undefined || creep.memory.harvesting == null) {
-            creep.memory.harvesting = true
-        }
+        harvester.performRole = function (CreepRole, creep) {
 
-        if(creep.memory.target == undefined || creep.memory.target == null) {
-            if(creep.carry.energy >= creep.carryCapacity) {
-                var Target = creep.pos.findClosestByRange(FIND_MY_SPAWNS, {
+            if (creep.memory.state === undefined) {
+                creep.memory.state = 'searching'
+            }
+            if (creep.memory.state === 'searching') {
+                if (creep.memory.target === undefined) {
+                    creep.memory.target = null
+                }
+                var Target = creep.pos.findClosestByRange(FIND_SOURCES, {
                     filter: function(object) {
-                        return (object.energyCapacity - object.energy) >= creep.carryCapacity
+                        return (object.needsHarvesters() == true)
                     }
                 })
-                if(Target != null && Target != undefined) {
+                if(Target != null){
                     creep.memory.target = Target.id
-                    creep.moveTo(Target)
+                    creep.memory.state = 'harvesting'
                 }
             } else {
-                var Target = creep.pos.findClosestByRange(FIND_SOURCES_ACTIVE)
-                if(Target != null && Target != undefined) {
-                    creep.memory.target = Target.id
-                    creep.moveTo(Target)
-                }
-            }
-        } else {
-            var Target = Game.getObjectById(creep.memory.target)
-            if(Target != null && Target != undefined) {
-                //Yeah, turns out you run moveTo each iteration.
+                //creep.memory.state = 'harvesting'
+                var Target = Game.getObjectById(creep.memory.target)
                 creep.moveTo(Target)
-
-                if(creep.carry.energy >= creep.carryCapacity && creep.memory.harvesting) {
-                    //Reset the target, else it would be stuck at the source it was mining.
-                    creep.memory.target = null
-                    creep.memory.harvesting = false
-                } else if (creep.carry.energy == 0 && !creep.memory.harvesting) {
-                    //Reset the target, else it would be stuck at the spawn it dropped the energy off at.
-                    creep.memory.target = null
-                    creep.memory.harvesting = true
-                } else if(creep.pos.isNearTo(Target)) {
-                    if(creep.memory.harvesting) {
-                        creep.harvest(Target)
-                    } else {
-                        creep.transferEnergy(Target)
-                    }
-                }
+                creep.harvest(Target)
+                creep.dropEnergy()
             }
         }
-    }
     return harvester;
 }

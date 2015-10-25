@@ -1,0 +1,80 @@
+
+/**
+ * Created by Snipey on 10/5/2015.
+ */
+var bodies = {
+    turretBody: {
+        300: [MOVE, RANGED_ATTACK],
+        550: [MOVE, MOVE, RANGED_ATTACK, RANGED_ATTACK],
+        700: [MOVE, RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK],
+        1000: [MOVE, MOVE, RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK]
+    },
+    harvesterBody: {
+        300: [WORK, WORK, MOVE, MOVE],
+        550: [MOVE, MOVE, MOVE, WORK, WORK, WORK, WORK],
+        700: [WORK, WORK, WORK, WORK, MOVE, MOVE, MOVE, MOVE, WORK],
+        1000: [WORK, WORK, WORK, WORK, WORK, MOVE, MOVE, MOVE, MOVE, MOVE, WORK, CARRY, CARRY, MOVE]
+    },
+    builderBody: {
+        300: [WORK, CARRY, MOVE, CARRY, MOVE],
+        550: [MOVE, MOVE, MOVE, CARRY, CARRY, MOVE, WORK, CARRY, WORK],
+        700: [MOVE, MOVE, MOVE, MOVE, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY],
+        1000: [MOVE, MOVE, MOVE, MOVE, MOVE, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY]
+    },
+    upgraderBody: {
+        300: [WORK, CARRY, MOVE, CARRY, MOVE],
+        550: [MOVE, MOVE, MOVE, CARRY, CARRY, MOVE, WORK, CARRY, WORK],
+        700: [MOVE, MOVE, MOVE, MOVE, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY],
+        1000: [MOVE, MOVE, MOVE, MOVE, MOVE, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY]
+    },
+    guardBody: {
+        300: [TOUGH, TOUGH, TOUGH, TOUGH, MOVE, MOVE, ATTACK, ATTACK],
+        550: [TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, MOVE, MOVE, MOVE, MOVE, ATTACK, ATTACK, ATTACK],
+        700: [TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, MOVE, MOVE, MOVE, MOVE, MOVE, ATTACK, ATTACK, ATTACK, ATTACK, ATTACK],
+        1000: [TOUGH, TOUGH, TOUGH, TOUGH, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, ATTACK, ATTACK, ATTACK, ATTACK, ATTACK, ATTACK, ATTACK]
+    },
+    mechanicBody: {
+        300: [MOVE, MOVE, WORK, CARRY, CARRY],
+        550: [MOVE, MOVE, MOVE, MOVE, WORK, WORK, CARRY, CARRY, CARRY],
+        700: [MOVE, MOVE, MOVE, MOVE, MOVE, WORK, WORK, WORK, CARRY, CARRY, CARRY],
+        1000: [MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY]
+    },
+    transportBody: {
+        300: [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY],
+        550: [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, MOVE, CARRY, CARRY, MOVE],
+        700: [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, MOVE, CARRY, CARRY, MOVE, MOVE, CARRY, MOVE],
+        1000: [MOVE, MOVE, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, MOVE, CARRY, CARRY, CARRY, MOVE, CARRY, CARRY, CARRY, CARRY]
+    },
+    archerBody: {
+        300: [TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, MOVE, MOVE, RANGED_ATTACK],
+        550: [MOVE, MOVE, RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK],
+        700: [MOVE, MOVE, RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK],
+        1000: [MOVE, MOVE, MOVE, MOVE, MOVE, RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK, RANGED_ATTACK]
+    },
+    healerBody: {
+        300: [MOVE, HEAL],
+        550: [MOVE, HEAL, HEAL],
+        700: [TOUGH, MOVE, MOVE, MOVE, HEAL, HEAL],
+        1000: [TOUGH, MOVE, MOVE, MOVE, MOVE, HEAL, HEAL, HEAL]
+    }
+}
+
+function calcEnergy(p_room) {
+    if (Game.rooms[p_room].energyCapacityAvailable >= 1000) {
+        return 1000;
+    }
+    else if (Game.rooms[p_room].energyCapacityAvailable >= 700) {
+        return 700;
+    }
+    else if (Game.rooms[p_room].energyCapacityAvailable >= 550) {
+        return 550;
+    }
+    else if (Game.rooms[p_room].energyCapacityAvailable >= 300) {
+        return 300;
+    }
+}
+
+module.exports = {
+    bodies: bodies,
+    calcEnergy: calcEnergy
+}
