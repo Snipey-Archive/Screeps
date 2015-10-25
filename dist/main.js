@@ -5,6 +5,7 @@
  * This module runs once every CPU "tick".
  *
  */
+var path = require('pathfinding')
 var profiler = require('profiler')
 var CreepSpawning = require('creep_spawner')
 var CreepRole = require('creep_role')()
@@ -119,7 +120,7 @@ if(Memory.debug === true){
     console.log(" - Hauler count: " + Memory.bots['hauler'].length)
     console.log(" - Helper count: " + Memory.bots['upgradehelper'].length)
     console.log(" - Builder count: " + Memory.bots['builder'].length)
-}
+}/*
     for(var creep in Memory.creeps){
         if(!Game.creeps[creep]){
             if(Memory.creeps[creep].safeToDelete){
@@ -129,5 +130,5 @@ if(Memory.debug === true){
                 Memory.creeps[creep].safeToDelete = true;
             }
         }
-    }
+    }*/
 }

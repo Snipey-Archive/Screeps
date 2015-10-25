@@ -35,22 +35,19 @@ module.exports = function() {
         },
 
         travelminer.performRole = function(CreepRole, creep) {
-            var source = Game.getObjectById('55db34cfefa8e3fe66e060fb')
-            if(!source){
-                var exit = creep.room.find(FIND_FLAGS, {
-                    filter: function(object){
-                        return object.color == COLOR_GREEN
+            if(creep.room.name = 'E29N19'){
+                path.doTravel(creep, '562c868d86c8a46c1e41977e')//flag_out_1
+            }else if(creep.room.name == 'E29N18'){
+                path.doTravel(creep, '562c86b186c8a46c1e41bfe9')//flag_out_2
+            }else if(creep.roomName == 'E28N18'){
+                path.doTravel(creep, '562ca73986c8a46c1e6684b3')//travel_mine_1
+                if(creep.pos.isNearTo(Game.getObjectById('562ca73986c8a46c1e6684b3'))){
+                    var source = Game.getObjectById('55db34cfefa8e3fe66e060fb')
+                    creep.harvest(source)
+                    if(creep.carry.energy >= creep.carryCapacity){
+                        creep.memory.state = 'transferring'
                     }
-                })
-                creep.moveTo(new RoomPosition(2, 49, 'E29N19'))
-                creep.moveTo(new RoomPosition(0, 6, 'E29N18'))
-                //console.log('source is not in this room')
-            }
-            if(creep.pos.isNearTo(source)){
-                creep.harvest(source)
-                creep.dropEnergy()
-            }else{
-                creep.moveTo(source)
+                }
             }
         }
     return travelminer;

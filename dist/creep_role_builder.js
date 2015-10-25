@@ -109,7 +109,11 @@ module.exports = function() {
                         return;
                     }
 
-                    var constructionSites = creep.room.find(FIND_CONSTRUCTION_SITES);
+                    var constructionSites = creep.room.find(FIND_CONSTRUCTION_SITES, {
+                        filter: function(object){
+                            return object.structureType != STRUCTURE_ROAD
+                        }
+                    });
 
                     if (constructionSites.length) {
                         if (!creep.pos.inRangeTo(constructionSites[0].pos, 1)) {
@@ -125,22 +129,18 @@ module.exports = function() {
 
                     var newStructures = creep.room.find(FIND_STRUCTURES, {
                         filter: function(object) {
-                            return (object.structureType == STRUCTURE_RAMPART || object.structureType == STRUCTURE_WALL) && (object.hits < object.hitsMax * 0.25);
+                            return object.structureType == STRUCTURE_RAMPART && object.hits < 30000;
                         }
                     });
-                    if (newStructures.length) {
-                        if (!creep.pos.inRangeTo(newStructures[0].pos, 1)) {
-                            creep.moveTo(newStructures[0]);
-                        }
-                        creep.repair(newStructures[0]);
-
-                        return;
+                    if(newStructures != null){
+                        creep.moveTo(newStructures[0])
+                        creep.repair(newStructures[0])
                     }
 
 
                     var walls = creep.room.find(FIND_STRUCTURES, {
                         filter: function(object) {
-                            return object.structureType == STRUCTURE_WALL && object.hits < 100000;
+                            return object.structureType == STRUCTURE_WALL && object.hits < 30000;
                         }
                     });
                     if (walls.length) {

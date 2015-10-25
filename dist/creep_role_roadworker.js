@@ -46,12 +46,12 @@ module.exports = function() {
                         return object.structureType == STRUCTURE_ROAD && (object.hits < object.hitsMax * 0.25);
                     }
                 });
-                if(constructionSites != null){
-                    creep.moveTo(constructionSites[0])
-                    creep.build(constructionSites[0])
-                }else{
+                if(roadToRepair != null){
                     creep.moveTo(roadToRepair[0])
                     creep.repair(roadToRepair[0])
+                }else{
+                    creep.moveTo(constructionSites[0])
+                    creep.build(constructionSites[0])
                 }
 
             }else{

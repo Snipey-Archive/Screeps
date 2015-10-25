@@ -119,7 +119,7 @@ module.exports = function () {
                             } else {
                                 var storage = creep.room.storage
                                 if (storage != null) {
-                                    creep.moveTo(storage);
+                                    creep.moveTo(storage, { reusePath: 15});
                                     creep.transferEnergy(storage);
                                 }
                             }

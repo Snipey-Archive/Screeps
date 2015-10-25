@@ -37,11 +37,12 @@ module.exports = function stayAlive() {
             Memory.bots['builder'].push('inQ');
         }else if (Memory.spawnQueue[i] == 'roadworker'){
             Memory.bots['roadworker'].push('inQ');
+        }else if (Memory.spawnQueue[i] == 'travelhauler'){
+            Memory.bots['travelhauler'].push('inQ');
+        }else if (Memory.spawnQueue[i] == 'travelminer'){
+            Memory.bots['travelminer'].push('inQ');
         }
     }
-
-
-
     if(Memory.bots['harvester'].length < 2){
         Memory.spawnQueue.unshift('harvester')
     }
@@ -63,6 +64,12 @@ module.exports = function stayAlive() {
     if(Memory.bots['roadworker'].length < 2){
         Memory.spawnQueue.push('roadworker')
     }
+    /*if(Memory.bots['travelminer'].length < 1){
+        Memory.spawnQueue.push('travelminer')
+    }
+    if(Memory.bots['travelhauler'].length < 5){
+        Memory.spawnQueue.push('travelhauler')
+    }*/
 }
 /*
 
