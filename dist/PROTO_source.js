@@ -30,14 +30,3 @@ Source.prototype.needsHarvesters = function() {
 
     return workParts < 5 && harvesters.length < this.freeEdges();
 };
-
-Source.prototype.needsHaulers = function() {
-    var haulers = this.room.find(FIND_MY_CREEPS, {filter: {memory: {role: 'hauler', target: this.id }}});
-    var haulerCount = 0
-    haulers.forEach(function(hauler){
-        //if(hauler.memory.target == this.id){
-            haulerCount = haulerCount + 1
-
-    })
-    return haulerCount < 3
-}

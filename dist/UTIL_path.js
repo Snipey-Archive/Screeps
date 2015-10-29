@@ -484,6 +484,7 @@ function getCoordinate(thePath, index)
 function getOpenSquares(theRoom, thePos)
 {
     var surroundings = theRoom.lookForAtArea("terrain", thePos.y - 1, thePos.x - 1, thePos.y + 1, thePos.x + 1);
+    console.log(JSON.stringify(theRoom) + " - " + JSON.stringify(thePos));
     var positions = [];
     for (var y in surroundings)
     {

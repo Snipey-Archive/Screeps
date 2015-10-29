@@ -17,24 +17,27 @@ module.exports = function() {
             [WORK, CARRY, MOVE, CARRY, MOVE],
             [MOVE, MOVE, MOVE, CARRY, CARRY, MOVE, WORK, CARRY, WORK],
             [MOVE, MOVE, MOVE, MOVE, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY],
-            [MOVE, MOVE, MOVE, MOVE, MOVE, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY]
+            [MOVE, MOVE, MOVE, MOVE, MOVE, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, CARRY],
+            [MOVE, MOVE, MOVE, MOVE, MOVE, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY]
+
         ],
 
         costs: [
             300,
             550,
             700,
-            1000
+            1000,
+            1200
         ]
     };
 
     builder.getPartsForExtensionCount = function(count) {
-        console.log("Parts By Extension: "+this.parts[count])
+        //console.log("Parts By Extension: "+this.parts[count])
         return this.parts[count]
     },
 
         builder.getParts = function() {
-            return this.getPartsForExtensionCount(0)
+            return this.getPartsForExtensionCount(4)
         },
 
         builder.getCostForExtensionCount = function(count) {
@@ -42,113 +45,141 @@ module.exports = function() {
         },
 
         builder.getCost = function() {
-            return this.getCostForExtensionCount(0)
+            return this.getCostForExtensionCount(4)
         },
 
         builder.performRole = function(CreepRole, creep) {
-            var spawn = Game.spawns.Spawn1;
-                if (creep.ticksToLive < 30) {
-                    var storage = creep.pos.findClosestByRange(FIND_MY_SPAWNS)
+            /*//var repairflag = Game.flags['repair']
+            if(creep.memory.target == undefined){
+                creep.memory.target = null
+            }
+            var const = creep.room.find(FIND_CONSTRUCTION_SITES, {
+                filter: function(o){
+                    return o.structureType != STRUCTURE_RAMPART && o.structureType != STRUCTURE_ROAD
+                }
+            })
+            var ramp = creep.room.find(FIND_MY_STRUCTURES, {
+                filter: function(o){
+                    return o.structureType == STRUCTURE_RAMPART && o.needsRepair() == true && o.hasRepair() == false
+                }
+            })
+            //console.log(rampconst)
+            if(creep.carry.energy == 0){
+                var storage = creep.room.storage /!*creep.pos.findClosestByRange(FIND_MY_CREEPS, {
+                 filter: function (object) {
+                 return object.memory.role == 'upgradehelper' && object.carry.energy < object.carryCapacity
+                 }
+                 });*!/
+                if(creep.pos.isNearTo(storage)){
+                    storage.transferEnergy(creep)
+                }else{
+                    creep.moveTo(storage)
+                }
+            }else{
+                if(ramp.length > 0){
+                    if(creep.memory.target == null){
+                        creep.memory.target = ramp[0].id
+                    }else{
+                        var target = Game.getObjectById(creep.memory.target)
+                        if(creep.pos.isNearTo(target)){
+                            creep.repair(target)
+                        }else{
+                            creep.moveTo(target)
+                        }
+                    }
+                    if(creep.carry.energy == 0){
+                        creep.memory.target = null
+                    }
+                }else{
+                    //creep.memory.target = null
+                    if(creep.pos.isNearTo(rampconst[0])){
+                        creep.build(rampconst[0])
+                    }else{
+                        creep.moveTo(rampconst[0])
+                    }
+                }
+            }*/
+            var constructionSites = creep.room.find(FIND_CONSTRUCTION_SITES, {
+                filter: function(object){
+                    return object.structureType != STRUCTURE_ROAD && object.structureType != STRUCTURE_RAMPART
+                }
+            });
+
+            var walls = creep.room.find(FIND_STRUCTURES, {
+                filter: function(object) {
+                    return object.structureType == STRUCTURE_WALL
+                        && object.hits < object.hitsMax * 0.002
+                        && object.hasBuilder() == false
+                }
+            });
+            if (creep.memory.target == undefined) {
+                creep.memory.target = null
+                //creep.memory.state = 'searching'
+            }
+            if (creep.memory.state === undefined || creep.carry.energy === 0) {
+                creep.memory.state = "pickup";
+            }
+            if (creep.carry.energy === creep.carryCapacity) {
+                creep.memory.state = "work";
+            }
+            if(creep.memory.state == 'searching'){
+                if(walls.length > 0){
+                    if(creep.memory.target == null){
+                        creep.memory.target = walls[0].id
+                    }else{
+                        creep.memory.state = 'work'
+                    }
+                }else if (constructionSites.length > 0){
+                    if(creep.memory.target == null){
+                        creep.memory.target = constructionSites[0].id
+                    }else{
+                        creep.memory.state = 'work'
+                    }
+                }
+            }
+            else if (creep.memory.state == 'pickup') {
+                var storage = creep.room.storage
+                if (storage) {
                     creep.moveTo(storage);
-                    if (creep.energy > 0) {
-                        creep.transferEnergy(storage);
-                    }
-                    else if (creep.energy === 0) {
-                        creep.suicide();
+                    storage.transferEnergy(creep);
+                    return;
+                }
+                if(creep.carry.energy >= creep.carryCapacity){
+                    creep.memory.target = null
+                    creep.memory.state = 'searching'
+                }
+            }
+            else if (creep.memory.state == 'work') {
+                if (creep.memory.target) {
+                    var target = Game.getObjectById(creep.memory.target)
+                    if(creep.pos.isNearTo(target)){
+                        creep.build(target)
+                        creep.repair(target)
+                    }else{
+                        creep.moveTo(target)
                     }
                 }
-                if (creep.memory.state === undefined || creep.carry.energy === 0) {
-                    creep.memory.state = "pickup";
+
+
+                if (constructionSites.length) {
+                    if (!creep.pos.inRangeTo(constructionSites[0].pos, 1)) {
+                        creep.moveTo(constructionSites[0]);
+                    }
+                    creep.build(constructionSites[0]);
+                    var progress = constructionSites[0].progress
+                    var progressTotal = constructionSites[0].progressTotal
+                    var percent = Math.round(progress * 100 / progressTotal)
+                    //console.log('Construction progress of ' + constructionSites[0].name + ' is ' + percent + '%')
+                    return;
                 }
-                if (creep.carry.energy === creep.carryCapacity) {
-                    creep.memory.state = "work";
+
+                if (walls.length) {
+                    creep.moveTo(walls[0]);
+                    creep.repair(walls[0]);
+                    return;
                 }
 
-                if (creep.memory.state === 'pickup') {
-                    var storage = creep.pos.findClosestByRange(FIND_MY_STRUCTURES, {
-                        filter: function(object) {
-                            return object.structureType == STRUCTURE_STORAGE && object.store.energy > 0;
-                        }
-                    });
-                    if (storage) {
-                        creep.moveTo(storage);
-                        storage.transferEnergy(creep);
-                        return;
-                    }
-                    var extension = creep.pos.findClosestByRange(FIND_MY_STRUCTURES, {
-                        filter: function(object) {
-                            return object.structureType == STRUCTURE_EXTENSION && object.energy > 0;
-                        }
-                    });
-                    if (extension) {
-                        creep.moveTo(extension);
-                        extension.transferEnergy(creep);
-                        return;
-                    }
-                    if (spawn.energy > 10) {
-                        creep.moveTo(spawn);
-                        spawn.transferEnergy(creep);
-                        return;
-                    }                }
-                else if (creep.memory.state === 'work') {
-                    if (creep.memory.target) {
-                        var target = Game.getObjectById(creep.memory.target);
-                        if (target && target.hits < (creep.memory.targetHits ? creep.memory.targetHits : target.hitsMax)) {
-                            creep.say(target.structureType);
-                            creep.moveTo(target);
-                            creep.repair(target);
-                        } else {
-                            creep.memory.target = null;
-                        }
-                        return;
-                    }
-
-                    if (spawn.hits < spawn.hitsMax) {
-                        creep.moveTo(spawn);
-                        creep.repair(spawn);
-                        return;
-                    }
-
-                    var constructionSites = creep.room.find(FIND_CONSTRUCTION_SITES, {
-                        filter: function(object){
-                            return object.structureType != STRUCTURE_ROAD
-                        }
-                    });
-
-                    if (constructionSites.length) {
-                        if (!creep.pos.inRangeTo(constructionSites[0].pos, 1)) {
-                            creep.moveTo(constructionSites[0]);
-                        }
-                        creep.build(constructionSites[0]);
-                        var progress = constructionSites[0].progress
-                        var progressTotal = constructionSites[0].progressTotal
-                        var percent = Math.round(progress * 100 / progressTotal)
-                        //console.log('Construction progress of ' + constructionSites[0].name + ' is ' + percent + '%')
-                        return;
-                    }
-
-                    var newStructures = creep.room.find(FIND_STRUCTURES, {
-                        filter: function(object) {
-                            return object.structureType == STRUCTURE_RAMPART && object.hits < 30000;
-                        }
-                    });
-                    if(newStructures != null){
-                        creep.moveTo(newStructures[0])
-                        creep.repair(newStructures[0])
-                    }
-
-
-                    var walls = creep.room.find(FIND_STRUCTURES, {
-                        filter: function(object) {
-                            return object.structureType == STRUCTURE_WALL && object.hits < 30000;
-                        }
-                    });
-                    if (walls.length) {
-                        creep.moveTo(walls[0]);
-                        creep.repair(walls[0]);
-                        return;
-                    }
-                }
+            }
         }
     return builder;
 }

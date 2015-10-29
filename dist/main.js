@@ -5,14 +5,16 @@
  * This module runs once every CPU "tick".
  *
  */
-var path = require('pathfinding')
-var profiler = require('profiler')
+
+var profiler = require('UTIL_profiler')
 var CreepSpawning = require('creep_spawner')
 var CreepRole = require('creep_role')()
-var structure = require('structureProto')
-var source = require('sourceProto')
+var structure = require('PROTO_structure')
+var source = require('PROTO_source')
+var creep = require('PROTO_creep')
+var flag = require('PROTO_flag')
 var spawn = require('stayAlive')
-var controllerStatus = require('controllerStatus')
+var controllerStatus = require('DEBUG_controllerStatus')
 // Notes to self:
 // -Game.rooms accesses only rooms you have presence in.
 // -For arrays, shift removes and returns the first item,
@@ -20,15 +22,13 @@ var controllerStatus = require('controllerStatus')
 //    array[array.length - 1] gets the last item,
 //    and array[0] gets the first item,
 
-
-if(Memory.spawnQueue == undefined) {
-    //Create the array of creeps that need to be spawned.
-    Memory.spawnQueue = []
+for(var i in Game.spawns){
+    var room = Game.spawns[i].room.name
+    //console.log(room)
+    if(Memory.rooms[room].spawnQueue == undefined) {
+        Memory.rooms[room].spawnQueue = []
+    }
 }
-
-/*Source.prototype.getSourceHaulers = function(id){
-
-}*/
 
 // MAIN UPDATE LOOP
 // Stuff outside this loop only executes when a new global is created.
@@ -39,21 +39,12 @@ module.exports.loop = function() {
                 profiler.openProfile('ROOM_' + room.name)
             }
     }
+    profiler.openProfile('1: spawnlogic')
     spawn()
+    profiler.closeProfile('1: spawnlogic')
     //controllerStatus()
     //Have each of our creeps do its job.
-    /*for(var room in Game.rooms){
-        var sources = Game.rooms[room].find(FIND_SOURCES)
-        for(var source in sources){
-            if(sources[source].needsHarvesters()){
-                console.log(sources[source].id + " Needs harvesters")
-                //Memory.rooms[room].sources = sources[source].id
-            }else{
-                console.log(source[source].id + " has enough harvesters")
-                //Memory.rooms[room].sources =
-            }
-        }
-    }*/
+    profiler.openProfile('2: creepLogic')
     for(var i in Game.creeps) {
         var CreepCurrent = Game.creeps[i]
 
@@ -62,23 +53,27 @@ module.exports.loop = function() {
 
         CreepCurrent.performRole(CreepRole)
     }
-
+    profiler.closeProfile('2: creepLogic')
+    profiler.openProfile('3: creepCreation')
     //Have each of our spawns create creeps.
     for(var i in Game.spawns) {
         var SpawnCurrent = Game.spawns[i]
+        var room = SpawnCurrent.room.name
 
-        if(SpawnCurrent.spawning == null && Memory.spawnQueue[0] || Memory.spawnQueue[0] != undefined) {
-            console.log("    - Spawn has "+SpawnCurrent.room.energyAvailable+"/"+CreepRole.getRoleCost(Memory.spawnQueue[0])+" needed energy")
-            if(SpawnCurrent.room.energyAvailable >= CreepRole.getRoleCost(Memory.spawnQueue[0])) {
-                if(Number.isInteger(SpawnCurrent.createRole(CreepRole, Memory.spawnQueue[0]))) {
+        if(SpawnCurrent.spawning == null && Memory.rooms[room].spawnQueue[0] || Memory.rooms[room].spawnQueue[0] != undefined) {
+            //console.log("    - Spawn has "+SpawnCurrent.room.energyAvailable+"/"+CreepRole.getRoleCost(Memory.spawnQueue[0])+" needed energy")
+            if(SpawnCurrent.room.energyAvailable >= CreepRole.getRoleCost(Memory.rooms[room].spawnQueue[0])) {
+                if(Number.isInteger(SpawnCurrent.createRole(CreepRole, Memory.rooms[room].spawnQueue[0]))) {
                     console.log("Creating creep: Failed")
                 } else {
                     console.log("Creating creep: Succeeded")
-                    Memory.spawnQueue.shift();
+                    console.log("Spawning " + Memory.rooms[room].spawnQueue[0] + " in room " + SpawnCurrent.room.name)
+                    Memory.rooms[room].spawnQueue.shift();
                 }
             }
         }
     }
+    profiler.closeProfile('3: creepCreation')
 /*    for(var i in Memory.creeps) {
         for (var s in Game.spawns){
             var SpawnCurrent = Game.spawns[s]
@@ -92,7 +87,7 @@ module.exports.loop = function() {
         }
     }*/
 
-
+    //profiler.showProfiles()
     if(Memory.debug === true){
         for (var i in Game.rooms){
             var room = Game.rooms[i]
@@ -120,7 +115,7 @@ if(Memory.debug === true){
     console.log(" - Hauler count: " + Memory.bots['hauler'].length)
     console.log(" - Helper count: " + Memory.bots['upgradehelper'].length)
     console.log(" - Builder count: " + Memory.bots['builder'].length)
-}/*
+}
     for(var creep in Memory.creeps){
         if(!Game.creeps[creep]){
             if(Memory.creeps[creep].safeToDelete){
@@ -130,5 +125,5 @@ if(Memory.debug === true){
                 Memory.creeps[creep].safeToDelete = true;
             }
         }
-    }*/
+    }
 }

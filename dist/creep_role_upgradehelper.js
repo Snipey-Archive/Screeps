@@ -14,7 +14,7 @@ module.exports = function() {
             [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY],
             [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, MOVE, CARRY, CARRY, MOVE],
             [MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, MOVE, CARRY, CARRY, MOVE, MOVE, CARRY, MOVE],
-            [MOVE, MOVE, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, MOVE, CARRY, CARRY, CARRY, MOVE, CARRY, CARRY, CARRY, CARRY]
+            [MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY]
         ],
 
         costs: [
@@ -26,12 +26,12 @@ module.exports = function() {
     }
 
     upgradehelper.getPartsForExtensionCount = function(count) {
-        console.log("Parts By Extension: "+this.parts[count])
+        //console.log("Parts By Extension: "+this.parts[count])
         return this.parts[count]
     },
 
         upgradehelper.getParts = function() {
-            return this.getPartsForExtensionCount(0)
+            return this.getPartsForExtensionCount(3)
         },
 
         upgradehelper.getCostForExtensionCount = function(count) {
@@ -39,33 +39,49 @@ module.exports = function() {
         },
 
         upgradehelper.getCost = function() {
-            return this.getCostForExtensionCount(0)
+            return this.getCostForExtensionCount(3)
         },
 
         upgradehelper.performRole = function(CreepRole, creep) {
-            if(creep.memory.state === undefined){
-                creep.memory.state = 'gathering'
+            if(creep.memory.state == undefined){
+                creep.memory.state = 'sittingstill'
             }
-                if (creep.carry.energy >= creep.carryCapacity && creep.memory.state === 'transferring') {
-                    var Target = creep.pos.findClosestByRange(FIND_MY_CREEPS, {
+
+            var flag = Game.flags[creep.name]
+            //console.log(flag)
+            if(flag == undefined) {
+                if (creep.carry.energy > 0) {
+                    creep.memory.state = 'transferring'
+                    var Target = creep.room.find(FIND_MY_CREEPS, {
                         filter: function (object) {
-                            return object.memory.role == "upgrader"
+                            return object.memory.role == 'upgradehelper' && object.carry.energy < object.carryCapacity && object.memory.state == 'sittingstill'
                         }
                     });
+                    console.log(Target)
                     if (Target != null) {
-                        creep.moveTo(Target)
-                        creep.transferEnergy(Target)
-                        creep.memory.state = 'gathering'
+                        creep.moveTo(Target[0], {
+                            reusePath: 15
+                        })
+                        //console.log('4132412fdsfsdfsdf432')
+                        creep.transferEnergy(Target[0])
+                        //creep.memory.state = 'gathering'
                     }
                 } else {
-                    var Target = creep.pos.findClosestByRange(FIND_MY_SPAWNS)
+                    creep.memory.state = 'gathering'
+                    var Target = creep.room.storage
                     if (Target != null) {
-                        creep.moveTo(Target)
+                        creep.moveTo(Target, {
+                            reusePath: 15
+                        })
                         Target.transferEnergy(creep)
                     }
-                    creep.memory.state = 'tranferring'
+                    //creep.memory.state = 'tranferring'
                 }
-
+            }else{
+                creep.moveTo(flag, {
+                    reusePath: 15
+                })
+            }
         }
     return upgradehelper;
 };

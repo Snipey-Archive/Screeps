@@ -11,7 +11,7 @@ module.exports = function () {
         parts: [
             [WORK, WORK, MOVE, MOVE],
             [MOVE, MOVE, MOVE, WORK, WORK, WORK, WORK],
-            [WORK, WORK, WORK, WORK, MOVE, MOVE, MOVE, MOVE, WORK],
+            [WORK, WORK, WORK, WORK, MOVE, MOVE, MOVE, WORK, WORK],
             [WORK, WORK, WORK, WORK, WORK, MOVE, MOVE, MOVE, MOVE, MOVE, WORK, CARRY, CARRY, MOVE]
         ],
 
@@ -24,7 +24,7 @@ module.exports = function () {
     };
 
     harvester.getPartsForExtensionCount = function (count) {
-        console.log("Parts By Extension: " + this.parts[count])
+        //console.log("Parts By Extension: " + this.parts[count])
         return this.parts[count]
     },
 
@@ -42,7 +42,7 @@ module.exports = function () {
                 return this.getPartsForExtensionCount(3)
             }else{
                 return this.getPartsForExtensionCount(1)
-            }
+            }creep.room.energyCapacityAvailable
         },
 
         harvester.getCostForExtensionCount = function (count) {
@@ -90,7 +90,9 @@ module.exports = function () {
                 var Target = Game.getObjectById(creep.memory.target)
                 creep.moveTo(Target)
                 creep.harvest(Target)
-                creep.dropEnergy()
+                if(creep.carry.energy >= creep.carryCapacity){
+                    creep.dropEnergy()
+                }
             }
         }
     return harvester;

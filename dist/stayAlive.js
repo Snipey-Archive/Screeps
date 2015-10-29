@@ -5,133 +5,98 @@
 /*
  * Stayalive - code to keep breeding creeps
  */
+var settings = require('settings')
 module.exports = function stayAlive() {
-    Memory.bots = {
-        harvester: [],
-        hauler: [],
-        builder: [],
-        upgrader: [],
-        roadworker: [],
-        janitor: [],
+    Memory.travel = {
         travelminer: [],
-        travelhauler: []
-    };
-
-    for (var name in Game.creeps) {
-        var creep = Game.creeps[name];
-        if (creep.memory.role) {
-            Memory.bots[creep.memory.role].push(creep.id);
-        }
-    }
-
-    for(var i in Memory.spawnQueue){
-        if(Memory.spawnQueue[i] == 'harvester'){
-            Memory.bots['harvester'].push('inQ');
-        } else if (Memory.spawnQueue[i] == 'hauler'){
-            Memory.bots['hauler'].push('inQ');
-        } else if (Memory.spawnQueue[i] == 'upgrader'){
-            Memory.bots['upgrader'].push('inQ');
-        } else if (Memory.spawnQueue[i] == 'janitor'){
-            Memory.bots['janitor'].push('inQ');
-        } else if (Memory.spawnQueue[i] == 'builder'){
-            Memory.bots['builder'].push('inQ');
-        }else if (Memory.spawnQueue[i] == 'roadworker'){
-            Memory.bots['roadworker'].push('inQ');
-        }else if (Memory.spawnQueue[i] == 'travelhauler'){
-            Memory.bots['travelhauler'].push('inQ');
-        }else if (Memory.spawnQueue[i] == 'travelminer'){
-            Memory.bots['travelminer'].push('inQ');
-        }
-    }
-    if(Memory.bots['harvester'].length < 2){
-        Memory.spawnQueue.unshift('harvester')
-    }
-    if(Memory.bots['hauler'].length < 6 && Memory.bots['harvester'].length > 1){
-        Memory.spawnQueue.unshift('hauler')
-    }else if(Memory.bots['hauler'].length > 1 && Memory.bots['hauler'].length < 6){
-        Memory.spawnQueue.push('hauler')
+        travelhauler: [],
+        travelroad: [],
     }
     /*
-     if(Memory.bots['janitor'].length < 1){
-     Memory.spawnQueue.push('janitor')
-     }*/
-    if(Memory.bots['builder'].length < 3){
-        Memory.spawnQueue.push('builder')
-    }
-    if(Memory.bots['upgrader'].length < 1){
-        Memory.spawnQueue.push('upgrader')
-    }
-    if(Memory.bots['roadworker'].length < 2){
-        Memory.spawnQueue.push('roadworker')
-    }
-    /*if(Memory.bots['travelminer'].length < 1){
-        Memory.spawnQueue.push('travelminer')
-    }
-    if(Memory.bots['travelhauler'].length < 5){
-        Memory.spawnQueue.push('travelhauler')
-    }*/
-}
-/*
-
-/!**
- * Created by Snipey on 10/18/2015.
- *!/
-/!*
- * Stayalive - code to keep breeding creeps
- *!/
-module.exports = function stayAlive() {
-    for(var j in Game.rooms) {
-        Memory.rooms[j].bots = {
+     else if (Memory.spawnQueue[i] == 'travelhauler'){
+     Memory.bots['travelhauler'].push('inQ');
+     }else if (Memory.spawnQueue[i] == 'travelminer'){
+     Memory.bots['travelminer'].push('inQ');
+     }else if (Memory.spawnQueue[i] == 'travelroad'){
+     Memory.bots['travelroad'].push('inQ');
+     }
+     */
+    for (var i in Game.spawns) {
+        var room = Game.spawns[i].room.name
+        Memory.rooms[room].creepCounts = {
             harvester: [],
             hauler: [],
             builder: [],
             upgrader: [],
+            roadworker: [],
+            repair: [],
+            hoarder: [],
+            healer: [],
+            archer: [],
+            guard: [],
             upgradehelper: []
         };
-    }
-    for (var name in Game.creeps) {
-        var creep = Game.creeps[name];
-        if (creep.memory.role) {
-            Memory.rooms[j].bots[creep.memory.role].push(creep.id);
-        }
-    }
-
-    for(var j in Game.rooms) {
-        for (var i in Memory.rooms[j].spawnQueue) {
-            if (Memory.rooms[j].spawnQueue[i] == 'harvester') {
-                Memory.rooms[j].bots['harvester'].push('inQ');
-            } else if (Memory.rooms[j].spawnQueue[i] == 'hauler') {
-                Memory.rooms[j].bots['hauler'].push('inQ');
-            } else if (Memory.rooms[j].spawnQueue[i] == 'upgrader') {
-                Memory.rooms[j].bots['upgrader'].push('inQ');
-            } else if (Memory.rooms[j].spawnQueue[i] == 'upgradehelper') {
-                Memory.rooms[j].bots['upgradehelper'].push('inQ');
-            } else if (Memory.rooms[j].spawnQueue[i] == 'builder') {
-                Memory.rooms[j].bots['builder'].push('inQ');
+        for (var name in Game.creeps) {
+            var creep = Game.creeps[name];
+            if (creep.memory.role) {
+                Memory.rooms[room].creepCounts[creep.memory.role].push(creep.id);
             }
         }
-    }
 
 
-    for(var i in Game.rooms) {
-        var room = Game.rooms[i]
-        if (Memory.rooms[j].bots['harvester'].length < 6) {
-            Memory.spawnQueue.unshift('harvester')
+        for (var i in Memory.rooms[room].spawnQueue) {
+            if (Memory.rooms[room].spawnQueue[i] == 'harvester') {
+                Memory.rooms[room].creepCounts['harvester'].push('inQ');
+            } else if (Memory.rooms[room].spawnQueue[i] == 'hauler') {
+                Memory.rooms[room].creepCounts['hauler'].push('inQ');
+            } else if (Memory.rooms[room].spawnQueue[i] == 'upgrader') {
+                Memory.rooms[room].creepCounts['upgrader'].push('inQ');
+            } else if (Memory.rooms[room].spawnQueue[i] == 'janitor') {
+                Memory.rooms[room].creepCounts['janitor'].push('inQ');
+            } else if (Memory.rooms[room].spawnQueue[i] == 'builder') {
+                Memory.rooms[room].creepCounts['builder'].push('inQ');
+            } else if (Memory.rooms[room].spawnQueue[i] == 'roadworker') {
+                Memory.rooms[room].creepCounts['roadworker'].push('inQ');
+            } else if (Memory.rooms[room].spawnQueue[i] == 'repair') {
+                Memory.rooms[room].creepCounts['repair'].push('inQ');
+            } else if (Memory.rooms[room].spawnQueue[i] == 'hoarder') {
+                Memory.rooms[room].creepCounts['hoarder'].push('inQ');
+            } else if (Memory.rooms[room].spawnQueue[i] == 'healer') {
+                Memory.rooms[room].creepCounts['healer'].push('inQ');
+            } else if (Memory.rooms[room].spawnQueue[i] == 'archer') {
+                Memory.rooms[room].creepCounts['archer'].push('inQ');
+            } else if (Memory.rooms[room].spawnQueue[i] == 'guard') {
+                Memory.rooms[room].creepCounts['guard'].push('inQ');
+            } else if (Memory.rooms[room].spawnQueue[i] == 'upgradehelper') {
+                Memory.rooms[room].creepCounts['upgradehelper'].push('inQ');
+            }
         }
-        if (Memory.rooms[j].bots['hauler'].length < 5 && Memory.rooms[j].bots['harvester'].length > 1) {
-            Memory.spawnQueue.unshift('hauler')
-        } else if (Memory.rooms[j].bots['hauler'].length > 1 && Memory.rooms[j].bots['hauler'].length < 5) {
-            Memory.spawnQueue.push('hauler')
+        if(Memory.rooms[room].creepCounts['harvester'].length < settings.roomSpec[room].harvester){
+            Memory.rooms[room].spawnQueue.unshift('harvester')
         }
-        if (Memory.rooms[j].bots['builder'].length < 1) {
-            Memory.spawnQueue.push('builder')
+
+        if(Memory.rooms[room].creepCounts['hoarder'].length < settings.roomSpec[room].hoarder){
+            Memory.rooms[room].spawnQueue.unshift('hoarder')
         }
-        if (Memory.rooms[j].bots['upgrader'].length < 1) {
-            Memory.spawnQueue.push('upgrader')
+
+        if(Memory.rooms[room].creepCounts['hauler'].length < settings.roomSpec[room].hauler){
+            Memory.rooms[room].spawnQueue.unshift('hauler')
         }
-        /!*
-         if(Memory.rooms[j].bots['upgradehelper'].length < 1){
-         Memory.spawnQueue.push('upgradehelper')
-         }*!/
+
+        if(Memory.rooms[room].creepCounts['repair'].length < settings.roomSpec[room].repair){
+            Memory.rooms[room].spawnQueue.push('repair')
+        }
+
+        if(Memory.rooms[room].creepCounts['upgrader'].length < settings.roomSpec[room].upgrader){
+            Memory.rooms[room].spawnQueue.push('upgrader')
+        }
+
+        if(Memory.rooms[room].creepCounts['roadworker'].length < settings.roomSpec[room].repair){
+            Memory.rooms[room].spawnQueue.push('roadworker')
+        }
+
+        if(Memory.rooms[room].creepCounts['builder'].length < settings.roomSpec[room].repair){
+            Memory.rooms[room].spawnQueue.push('builder')
+        }
     }
-}*/
+}

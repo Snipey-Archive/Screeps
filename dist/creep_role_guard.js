@@ -1,48 +1,41 @@
 /**
- * An attacker.
+ * Created by Snipey on 10/25/2015.
  */
 
+
+/**
+ * Created by Snipey on 10/17/2015.
+ */
 module.exports = function() {
     var guard = {
         parts: [
-            [TOUGH, TOUGH, MOVE, MOVE, ATTACK, ATTACK]
+            [MOVE, MOVE, MOVE, WORK, WORK, WORK, WORK]
         ],
 
         costs: [
-            280
+            550
         ]
     };
 
     guard.getPartsForExtensionCount = function(count) {
-        return this.parts[0];
-    };
+        //console.log("Parts By Extension: "+this.parts[count])
+        return this.parts[count]
+    },
 
-    guard.getParts = function() {
-        return this.getPartsForExtensionCount(0);
-    };
+        guard.getParts = function() {
+            return this.getPartsForExtensionCount(0)
+        },
 
-    guard.getCostForExtensionCount = function(count) {
-        return this.costs[count]
-    };
+        guard.getCostForExtensionCount = function(count) {
+            return this.costs[count]
+        },
 
-    guard.getCost = function() {
-        return this.getCostForExtensionCount(0)
-    };
+        guard.getCost = function() {
+            return this.getCostForExtensionCount(0)
+        },
 
-    guard.performRole = function(creep) {
-        /*if(creep.memory.target == null || creep.memory.target == undefined) {
-            var targets = creep.room.find(HOSTILE_CREEPS);
-            if (targets.length) {
-                var Target = targets[0];
-                creep.memory.target = Target.id;
+        guard.performRole = function(CreepRole, creep) {
 
-                creep.moveTo(Target);
-                creep.attack(Target);
-            }
-        } else {
-            creep.attack(Target);
-        }*/
-    }
-
+        }
     return guard;
-};
+}

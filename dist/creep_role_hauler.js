@@ -23,12 +23,27 @@ module.exports = function () {
     }
 
     hauler.getPartsForExtensionCount = function (count) {
-        console.log("Parts By Extension: " + this.parts[count])
+        //console.log("Parts By Extension: " + this.parts[count])
         return this.parts[count]
     },
 
         hauler.getParts = function () {
-            return this.getPartsForExtensionCount(1)
+
+            var room = Game.rooms['E29N19']
+            if (room.energyAvailable >= 300 && room.energyAvailable < 550) {
+                console.log("LEVEL 1")
+                return this.getPartsForExtensionCount(0)
+            } else if (room.energyAvailable >= 550 && room.energyAvailable < 700) {
+                console.log("LEVEL 2")
+                return this.getPartsForExtensionCount(1)
+            } else if (room.energyAvailable >= 700 && room.energyAvailable < 1000) {
+                return this.getPartsForExtensionCount(2)
+            } else if (room.energyAvailable >= 1000) {
+                return this.getPartsForExtensionCount(3)
+            }else{
+                return this.getPartsForExtensionCount(1)
+            }
+            //return this.getPartsForExtensionCount(1)
         },
 
         hauler.getCostForExtensionCount = function (count) {
@@ -36,137 +51,87 @@ module.exports = function () {
         },
 
         hauler.getCost = function () {
-            return this.getCostForExtensionCount(1)
+
+            var room = Game.rooms['E29N19']
+            if (room.energyAvailable >= 300 && room.energyAvailable < 550) {
+                console.log("LEVEL 1")
+                return this.getCostForExtensionCount(0)
+            } else if (room.energyAvailable >= 550 && room.energyAvailable < 700) {
+                console.log("LEVEL 2")
+                return this.getCostForExtensionCount(1)
+            } else if (room.energyAvailable >= 700 && room.energyAvailable < 1000) {
+                return this.getCostForExtensionCount(2)
+            } else if (room.energyAvailable >= 1000) {
+                return this.getCostForExtensionCount(3)
+            }else{
+                return this.getCostForExtensionCount(1)
+            }
+            //return this.getCostForExtensionCount(1)
         },
 
         hauler.performRole = function (CreepRole, creep) {
-            //var profiler = require('profiler')
-            //profiler.openProfile('CREEP_' + creep.name)
-            if (creep.memory.state == undefined) {
-                creep.memory.state = 'searching'
-                creep.memory.target = null
-                //creep.say('Searching')
-            }
-            if (creep.memory.state == 'searching') {
-                if (creep.memory.target == undefined || creep.memory.target == null) {
-                    creep.memory.target = null
-                }
-                if(creep.memory.target == null){
-                    var Target = creep.pos.findClosestByRange(FIND_SOURCES, {
-                        filter: function(object) {
-                            return (object.needsHaulers() == true)
-                        }
-                    })
-                    if(Target != null){
-                        creep.memory.target = Target.id
-                        creep.memory.state = 'gathering'
-                        console.log(creep.name + ' is now a hauler for source ' + creep.memory.target)
-                        //creep.say('Gathering')
+            var storageflag = Game.flags['storage']
+            var creepflag = Game.flags[creep.name]
+
+            //console.log(creepflag)
+
+            if(creep.carry.energy < creep.carryCapacity){
+                var energy = creepflag.pos.findClosestByRange(FIND_DROPPED_ENERGY)
+                if(creep.room.name == creepflag.roomName){
+                    if(creepflag.pos.findInRange(creep, 3)){
+
+                    }else{
+                        creep.moveTo(creepflag)
+                    }
+                    if(creep.pos.isNearTo(energy)){
+                        creep.pickup(energy)
+                    }else{
+                        creep.moveTo(energy, {
+                            reusePath: 20
+                        })
+                    }
+                }else{
+                    if(creepflag != undefined){
+                        creep.moveTo(creepflag, {
+                            reusePath: 20
+                        })
                     }
                 }
             }else{
-                if(creep.memory.state == 'gathering'){
-                    var Target = Game.getObjectById(creep.memory.target)
-                    creep.moveTo(Target);
-                    if(creep.pos.findInRange(Target, 2) && creep.pos.isNearTo(Target)) {
-                        var energy1 = creep.pos.findClosestByRange(FIND_DROPPED_ENERGY);
-                        creep.moveTo(energy1, {
-                            reusePath: 15
-                        })
-                        creep.pickup(energy1)
-                    }
-                    if (creep.carry.energy >= creep.carryCapacity) {
-                        creep.memory.state = 'transferring'
-                        //creep.say('transferring')
-                    }
-                }else if(creep.memory.state == 'transferring') {
-                    if (creep.carry.energy > 0) {/*
-                        var nearestHauler = creep.pos.findClosestByRange(FIND_MY_CREEPS, {
-                            filter: function (object) {
-                                return object.memory.role == 'hauler' && object.carry.energy < object.carryCapacity
-                            }
-                        })
-                        if(creep.pos.isNearTo(nearestHauler) && nearestHauler.id != creep.id){
-                            creep.transferEnergy(nearestHauler)
-                            creep.memory.state = 'gathering'
-                        }*/
-
-                        var spawnEnergy = creep.pos.findClosestByRange(FIND_MY_STRUCTURES, {
-                            filter: function (object) {
-                                if (object.structureType == STRUCTURE_SPAWN) {
-                                    return object.energy < object.energyCapacity;
-                                }
-                            }
-                        });
-                        if (spawnEnergy) {
-                            creep.moveTo(spawnEnergy, {
-                                reusePath: 15
-                            });
-                            creep.transferEnergy(spawnEnergy);
-                        }else {
-                            var emptyExtensions1 = creep.pos.findClosestByRange(FIND_MY_STRUCTURES, {
-                                filter: function (object) {
-                                    if (object.structureType == STRUCTURE_EXTENSION) {
-                                        return object.energy < object.energyCapacity;
-                                    }
-                                }
-                            });
-                            if (emptyExtensions1) {
-                                creep.moveTo(emptyExtensions1, {
-                                    reusePath: 15
-                                });
-                                creep.transferEnergy(emptyExtensions1);
-                            } else {
-                                var storage = creep.room.storage
-                                if (storage != null) {
-                                    creep.moveTo(storage, { reusePath: 15});
-                                    creep.transferEnergy(storage);
-                                }
-                            }
-                        }
-                    } else {
-                        creep.memory.state = 'gathering'
-                    }
-                }
-            }
-            /*
-            var Target = creep.pos.findClosestByRange(FIND_SOURCES, {
-                filter: function(object) {
-                    return (object.needsHarvesters() == true)
-                }
-            })*/
-            //profiler.closeProfile('CREEP_' + creep.name)
-            //profiler.showProfiles()
-            /*if (creep.carry.energy > 1) {
-                if (Game.spawns.Spawn1.energy < 300) {
-                    creep.moveTo(Game.spawns.Spawn1);
-                    creep.transferEnergy(Game.spawns.Spawn1);
-                }
-                else {
-                    var emptyExtensions1 = creep.pos.findClosestByRange(FIND_MY_STRUCTURES, {
+                if(creep.pos.isNearTo(storageflag) && creep.room.name == storageflag.roomName){
+                    var energy = creep.room.storage
+                    var emptyExtensions = creep.pos.findClosestByRange(FIND_MY_STRUCTURES, {
                         filter: function (object) {
-                            if (object.structureType == 'extension') {
+                            if (object.structureType == STRUCTURE_EXTENSION || object.structureType == STRUCTURE_SPAWN) {
                                 return object.energy < object.energyCapacity;
                             }
                         }
                     });
-                    if (emptyExtensions1) {
-                        creep.moveTo(emptyExtensions1);
-                        creep.transferEnergy(emptyExtensions1);
+                    if (emptyExtensions) {
+                        creep.moveTo(emptyExtensions, {
+                            reusePath: 20
+                        });
+                        creep.transferEnergy(emptyExtensions);
                     } else {
-                        var storage = creep.room.storage
-                        if (storage != null) {
-                            creep.moveTo(storage);
-                            creep.transferEnergy(storage);
-                        }
+                        creep.moveTo(creepflag)
                     }
+                    if(creep.pos.isNearTo(energy)){
+                        creep.transferEnergy(energy)
+                    }else{
+                        creep.moveTo(energy, {
+                            reusePath: 20
+                        })
+                    }
+                }else{
+                    creep.moveTo(storageflag, {
+                        reusePath: 20
+                    })
                 }
             }
-            else {
-                var energy1 = creep.pos.findClosestByRange(FIND_DROPPED_ENERGY);
-                creep.moveTo(energy1);
-                creep.pickup(energy1);
-            }*/
+            /*
+             profiler.closeProfile('CREEP_' + creep.name)
+             profiler.showProfiles()
+             */
         }
     return hauler;
 };
